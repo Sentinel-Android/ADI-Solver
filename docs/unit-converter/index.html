@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engineering Unit Converter | Converted Values and Clipboard</title>
+<meta name="description" content="Convert engineering units for length, pressure, temperature, energy, viscosity and more. Copy converted values and retrieve them from clipboard history.">
+<link rel="canonical" href="https://adi.aditusan.dev/unit-converter/">
+
+<link rel="stylesheet" href="../assets/site.css">
+
+
+<script defer src="../assets/site.js"></script>
+<script defer src="../assets/unit-converter.js"></script>
+</head>
+<body class="site-adi">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../"><span class="brand-mark" aria-hidden="true">Δ</span>ADI Solver</a>
+    <nav class="site-nav" aria-label="Main navigation"><a href="../">Solver</a>
+<a href="../adi-method/">ADI method & definitions</a>
+<a href="../explicit-method-calculator/">Explicit</a>
+<a href="../implicit-method-calculator/">Implicit</a>
+<a href="../unit-converter/">Unit converter</a></nav>
+  </div>
+</header>
+<main class="wrap page" id="main">
+<div class="title">
+  <a class="back" href="../">← Full ADI solver</a>
+  <h1>Engineering unit converter</h1>
+  <p>Convert a quantity between units and copy the converted value for use in the solver.</p>
+</div><noscript><p class="noscript notice">Enable JavaScript to run this calculator. The reference text and links below are available without it.</p></noscript><div class="calculator"><section class="panel" aria-labelledby="unit-title">
+  <h2 class="panel-title" id="unit-title">Unit converter</h2>
+  <form class="panel-body unit-form" id="unit-form" novalidate>
+    <div class="field-grid">
+      <div class="field field-wide"><label for="quantity">Quantity</label>
+        <select id="quantity" name="quantity"><option>Length</option><option>Area</option><option>Volume</option><option>Pressure</option><option>Temperature</option><option>Mass</option><option>Time</option><option>Velocity</option><option>Mass Flow Rate</option><option>Volumetric Flow Rate</option><option>Energy</option><option>Power</option><option>Specific Heat</option><option>Thermal Conductivity</option><option>Dynamic Viscosity</option><option>Density</option></select></div>
+      <div class="field"><label for="unit-from">From</label><select id="unit-from" name="from"></select></div>
+      <div class="field"><label for="unit-to">To</label><select id="unit-to" name="to"></select></div>
+      <div class="field field-wide"><label for="unit-value">Value</label><input id="unit-value" name="value" type="number" step="any"></div>
+      <div class="field field-wide"><label for="unit-converted">Converted value</label><input id="unit-converted" name="converted" type="text" readonly></div>
+    </div>
+    <div class="actions form-actions"><button class="primary" type="submit">Calculate + Copy</button></div>
+    <p class="status" id="unit-status" role="status"></p>
+  </form>
+</section><section class="panel" id="unit-history" aria-labelledby="unit-history-title">
+  <div class="panel-title history-header">
+    <h2 id="unit-history-title">Clipboard history</h2>
+    <button type="button" class="history-clear" disabled>Clear history</button>
+  </div>
+  <p class="empty small history-empty">No unit conversions saved on this page yet.</p>
+  <ul class="history-list"></ul>
+  <p class="history-message" role="status"></p>
+</section></div><section class="section prose"><h2>Conversion formula</h2>
+        <div class="equation"><div>v<sub>out</sub> = v<sub>in</sub> × (f<sub>in</sub> / f<sub>out</sub>)</div></div>
+        <section class="notation"><h3>Symbols</h3><dl class="symbol-key">
+    <dt>v<sub>in</sub>, v<sub>out</sub></dt><dd>Numerical values in the input and output units.</dd><dt>f<sub>in</sub>, f<sub>out</sub></dt><dd>Multipliers that express one unit of the input or output in a common base unit.</dd>
+  </dl></section>
+        <h3>Temperature scales</h3>
+        <div class="equation"><div>T<sub>K</sub> = T<sub>°C</sub> + 273.15</div><div>T<sub>°C</sub> = (T<sub>°F</sub> − 32) × 5/9</div></div>
+        <section class="notation"><h3>Symbols</h3><dl class="symbol-key">
+    <dt>T<sub>K</sub></dt><dd>Temperature in kelvins.</dd><dt>T<sub>°C</sub></dt><dd>Temperature in degrees Celsius.</dd><dt>T<sub>°F</sub></dt><dd>Temperature in degrees Fahrenheit.</dd>
+  </dl></section>
+        <h2>Worked example</h2><p>Pressure of 2 bar converts to <strong>200000 Pa</strong> using 100,000 Pa per bar.</p>
+        <p>The available quantities follow the unit converter in Chapter 5 of the Adsorption Chiller project report.</p></section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="https://aditusan.dev/">aditusan.dev</a>
+    <nav aria-label="Footer navigation">
+      <a href="../">Full ADI solver</a>
+      <a href="../privacy/">Privacy</a>
+      
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

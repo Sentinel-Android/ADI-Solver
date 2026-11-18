@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alternating Direction Implicit (ADI) Method and Coefficients</title>
+<meta name="description" content="Learn how the ADI method splits each time step, how to convert a discretised equation to a–h coefficients, and what each grid quantity represents.">
+<link rel="canonical" href="https://adi.aditusan.dev/adi-method/">
+
+<link rel="stylesheet" href="../assets/site.css">
+
+
+<script defer src="../assets/site.js"></script>
+</head>
+<body class="site-adi">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../"><span class="brand-mark" aria-hidden="true">Δ</span>ADI Solver</a>
+    <nav class="site-nav" aria-label="Main navigation"><a href="../">Solver</a>
+<a href="../adi-method/">ADI method & definitions</a>
+<a href="../explicit-method-calculator/">Explicit</a>
+<a href="../implicit-method-calculator/">Implicit</a>
+<a href="../unit-converter/">Unit converter</a></nav>
+  </div>
+</header>
+<main class="wrap page" id="main">
+<div class="title">
+  <a class="back" href="../">← Full ADI solver</a>
+  <h1>Alternating Direction Implicit method</h1>
+  <p>Equations, coefficients, and quantity definitions for the 2D solver.</p>
+</div><section class="section adi-reference" id="equations-and-coefficients" aria-labelledby="equations-heading">
+  <header class="adi-reference-header">
+    <h2 id="equations-heading">Equations and coefficient conversion</h2>
+    <a href="../#problem-setup">Go to problem setup</a>
+  </header>
+  <div class="panel panel-body">
+    <h3>Start with the 2D heat equation</h3>
+    <div class="adi-math adi-math-compact" tabindex="0" role="region"
+    aria-label="Two-dimensional heat equation"><math display="block"><mfrac><mrow><mo>∂</mo><mi>T</mi></mrow><mrow><mo>∂</mo><mi>t</mi></mrow></mfrac><mo>=</mo><mi>α</mi><mo>(</mo><mfrac><mrow><msup><mo>∂</mo><mn>2</mn></msup><mi>T</mi></mrow><mrow><mo>∂</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mo>+</mo><mfrac><mrow><msup><mo>∂</mo><mn>2</mn></msup><mi>T</mi></mrow><mrow><mo>∂</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac><mo>)</mo></math></div>
+    <h3>Discretise time and space</h3>
+    <p>Use a backward difference in time and centred second differences in space. The discrete equation at an interior node is</p>
+    <div class="adi-math" tabindex="0" role="region"
+    aria-label="Backward time difference and centred spatial differences"><math display="block"><mfrac><mrow><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi></mrow></msubsup></mrow><mrow><mi>Δ</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mi>α</mi><mo>(</mo><mfrac><mrow><msubsup><mi>T</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><mn>2</mn><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup></mrow><mrow><msup><mrow><mo>(</mo><mi>Δ</mi><mi>x</mi><mo>)</mo></mrow><mn>2</mn></msup></mrow></mfrac><mo>+</mo><mfrac><mrow><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>+</mo><mn>1</mn></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><mn>2</mn><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>−</mo><mn>1</mn></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup></mrow><mrow><msup><mrow><mo>(</mo><mi>Δ</mi><mi>y</mi><mo>)</mo></mrow><mn>2</mn></msup></mrow></mfrac><mo>)</mo></math></div>
+    <h3>Match the solver’s coefficient form</h3>
+    <p>Factor one grid spacing out of each spatial denominator. For the x direction, the conversion is</p>
+    <div class="adi-math" tabindex="0" role="region"
+    aria-label="Factoring the x-direction heat diffusion term"><math display="block"><mfrac><mrow><mi>α</mi><mo>(</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><mn>2</mn><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>)</mo></mrow><mrow><msup><mrow><mo>(</mo><mi>Δ</mi><mi>x</mi><mo>)</mo></mrow><mn>2</mn></msup></mrow></mfrac><mo>=</mo><mfrac><mrow><mfrac><mrow><mi>α</mi></mrow><mrow><mi>Δ</mi><mi>x</mi></mrow></mfrac><msubsup><mi>T</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><mfrac><mrow><mn>2</mn><mi>α</mi></mrow><mrow><mi>Δ</mi><mi>x</mi></mrow></mfrac><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mfrac><mrow><mi>α</mi></mrow><mrow><mi>Δ</mi><mi>x</mi></mrow></mfrac><msubsup><mi>T</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup></mrow><mrow><mi>Δ</mi><mi>x</mi></mrow></mfrac></math></div>
+    <p>Do the same for the y direction, then match the two numerators to this form.</p>
+    <div class="adi-math" tabindex="0" role="region"
+    aria-label="Solver form with coefficients a through h"><math display="block"><mfrac><mrow><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi></mrow></msubsup></mrow><mrow><mi>Δ</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mi>a</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>b</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>c</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>d</mi></mrow><mrow><mi>Δ</mi><mi>x</mi></mrow></mfrac><mo>+</mo><mfrac><mrow><mi>e</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>+</mo><mn>1</mn></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>f</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>g</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>−</mo><mn>1</mn></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>h</mi></mrow><mrow><mi>Δ</mi><mi>y</mi></mrow></mfrac></math></div>
+    <p class="small muted">The form above shows all spatial terms at time level <var>n</var> + 1. ADI uses the same coefficients in two sweeps, treating x implicitly first and y implicitly second.</p>
+    <div class="adi-reference-grid">
+      <section>
+        <h3>Coefficients to enter</h3>
+        <div class="table-wrap">
+          <table class="adi-coefficient-table">
+            <thead><tr><th scope="col">Input</th><th scope="col">Meaning</th><th scope="col">Heat equation value</th></tr></thead>
+            <tbody><tr><th scope="row"><var>a</var></th><td>East neighbour (i + 1, j)</td><td>α/Δx</td></tr><tr><th scope="row"><var>b</var></th><td>Centre node, x direction</td><td>−2α/Δx</td></tr><tr><th scope="row"><var>c</var></th><td>West neighbour (i − 1, j)</td><td>α/Δx</td></tr><tr><th scope="row"><var>d</var></th><td>Source term, x direction</td><td>0</td></tr><tr><th scope="row"><var>e</var></th><td>North neighbour (i, j + 1)</td><td>α/Δy</td></tr><tr><th scope="row"><var>f</var></th><td>Centre node, y direction</td><td>−2α/Δy</td></tr><tr><th scope="row"><var>g</var></th><td>South neighbour (i, j − 1)</td><td>α/Δy</td></tr><tr><th scope="row"><var>h</var></th><td>Source term, y direction</td><td>0</td></tr></tbody>
+          </table>
+        </div>
+        <p class="small">For constant thermal diffusivity, use these values at every interior node. Enter the initial temperatures in <strong>U<sub>0</sub></strong>, set <var>m</var> = 1 and leave <var>G</var> at zero.</p>
+      </section>
+      <div>
+        <section class="notation"><h3>Symbols</h3><dl class="symbol-key">
+    <dt>T</dt><dd>Temperature in a consistent unit throughout the grid.</dd><dt>T<sub>i,j</sub><sup>n</sup></dt><dd>Temperature at grid node (i, j) at the current time level n. The superscript n + 1 indicates the next time level.</dd><dt>x, y, t</dt><dd>Spatial coordinates x and y in metres, and time t in seconds.</dd><dt>i, j, k</dt><dd>Zero-based x-node, y-node, and variable indices. In this single-temperature model, k is 0.</dd><dt>α</dt><dd>Thermal diffusivity, in m²/s.</dd><dt>N<sub>x</sub></dt><dd>Number of nodes in the x direction.</dd><dt>N<sub>y</sub></dt><dd>Number of nodes in the y direction.</dd><dt>m</dt><dd>Number of variables or equations at each node.</dd><dt>Δx</dt><dd>Grid spacing in the x direction, in metres for the heat example.</dd><dt>Δy</dt><dd>Grid spacing in the y direction, in metres for the heat example.</dd><dt>N<sub>t</sub></dt><dd>Number of time steps.</dd><dt>Δt</dt><dd>Time step size, in seconds for the heat example.</dd><dt>U<sub>0</sub></dt><dd>Initial values on the grid. For heat diffusion these are the temperatures at time level 0.</dd><dt>G</dt><dd>m × m matrix for coupling different variables at the same node.</dd>
+  </dl></section>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="prose">
+  <h2>Two directional sweeps</h2>
+  <p>The Alternating Direction Implicit (ADI) method in Chapter 4 of the <em>Adsorption Chiller</em> project report treats x implicitly during the first half step and y implicitly during the second. The other direction is evaluated from known values in each sweep. The solver applies the Thomas algorithm to scalar tridiagonal systems and the Block Thomas algorithm to locally coupled variables.</p>
+  <div class="equation"><div>(I − Δt L<sub>x</sub>/2) U<sup>*</sup> = (I + Δt L<sub>y</sub>/2) U<sup>n</sup> + Δt S/2</div><div>(I − Δt L<sub>y</sub>/2) U<sup>n+1</sup> = (I + Δt L<sub>x</sub>/2) U<sup>*</sup> + Δt S/2</div><div>S = d/Δx + h/Δy</div></div>
+  <section class="notation"><h3>Symbols</h3><dl class="symbol-key">
+    <dt>I</dt><dd>Identity matrix.</dd><dt>Δt</dt><dd>Full time step. Each sweep uses Δt/2.</dd><dt>L<sub>x</sub>, L<sub>y</sub></dt><dd>Discrete x and y operators. Each includes half of the local coupling matrix G.</dd><dt>U<sup>n</sup>, U<sup>*</sup>, U<sup>n+1</sup></dt><dd>Current, intermediate, and next-step solution vectors.</dd><dt>n</dt><dd>Time-level index.</dd><dt>S</dt><dd>Combined source term for both directions.</dd><dt>d, h</dt><dd>Source coefficients in the x and y directions.</dd><dt>Δx, Δy</dt><dd>Grid spacing in the x and y directions.</dd>
+  </dl></section>
+  <h3>Coupled equations</h3>
+  <p>When each node has multiple variables, use the same coefficient form for the state vector U and include the local coupling term.</p>
+  <div class="equation"><div>∂U<sub>P</sub>/∂t = (a U<sub>E</sub> + b U<sub>P</sub> + c U<sub>W</sub> + d)/Δx + (e U<sub>N</sub> + f U<sub>P</sub> + g U<sub>S</sub> + h)/Δy + G U<sub>P</sub></div></div>
+  <section class="notation"><h3>Symbols</h3><dl class="symbol-key">
+    <dt>U<sub>P</sub></dt><dd>State vector at the centre node.</dd><dt>U<sub>E</sub>, U<sub>W</sub></dt><dd>East and west neighbour vectors.</dd><dt>U<sub>N</sub>, U<sub>S</sub></dt><dd>North and south neighbour vectors.</dd><dt>G U<sub>P</sub></dt><dd>Contribution of the variables at the centre node to each other through the coupling matrix G.</dd>
+  </dl></section>
+  <h2>Numerical method terms</h2>
+</div>
+<div class="panel table-wrap"><table>
+  <thead><tr><th scope="col">Quantity</th><th scope="col">Definition</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Spatial coupling</th><td>Dependence between neighbouring nodes through the discretised x and y operators.</td></tr>
+    <tr><th scope="row">Tridiagonal system</th><td>A linear system whose only potentially nonzero entries lie on the main and adjacent diagonals.</td></tr>
+    <tr><th scope="row">Block Thomas method</th><td>A line solver that treats each tridiagonal entry as a matrix block so it can solve interacting variables together.</td></tr>
+    <tr><th scope="row">Explicit method</th><td>Uses known values from the current step to calculate the next step directly.</td></tr>
+    <tr><th scope="row">Implicit method</th><td>Includes unknown values from the next step in a system that is solved simultaneously.</td></tr>
+  </tbody>
+</table></div>
+<section class="section prose">
+  <h2>Boundary convention</h2>
+  <p>Fixed edge values from U<sub>0</sub> are the default and enter both sweeps. Desktop compatibility reproduces the Python line solves, which omit the implicit end contributions while still using edge values in the explicit terms. A grid with fewer than three nodes in either direction returns the initial values.</p>
+  <h2>Worked example</h2>
+  <p>For α = 1, Δx = Δy = 1, Δt = 0.1 and N<sub>t</sub> = 10, set the edge values to 100 and the centre to 0 on a 3 × 3 grid. With fixed boundaries the solver returns <strong>98.1928405</strong> at (1, 1, 0). Use Load example in the <a href="../">full solver</a> to run these inputs.</p>
+  <h2>References</h2><p>Project <em>Adsorption Chiller</em>, Chapter 4 (ADI method) and Chapter 5 (ADI Solver GUI), and the accompanying Python Tkinter source.</p>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="https://aditusan.dev/">aditusan.dev</a>
+    <nav aria-label="Footer navigation">
+      <a href="../">Full ADI solver</a>
+      <a href="../privacy/">Privacy</a>
+      
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

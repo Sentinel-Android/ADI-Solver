@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ADI Solver | Alternating Direction Implicit Method Calculator</title>
+<meta name="description" content="Solve two-dimensional transient equations with Alternating Direction Implicit sweeps. Edit coefficients by node, navigate results, and convert engineering units.">
+<link rel="canonical" href="https://adi.aditusan.dev/">
+
+<link rel="stylesheet" href="./assets/site.css">
+
+
+<script defer src="./assets/site.js"></script>
+<script defer src="./assets/solver.js"></script>
+<script defer src="./assets/unit-converter.js"></script>
+</head>
+<body class="site-adi">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">Δ</span>ADI Solver</a>
+    <nav class="site-nav" aria-label="Main navigation"><a href="./">Solver</a>
+<a href="./adi-method/">ADI method & definitions</a>
+<a href="./explicit-method-calculator/">Explicit</a>
+<a href="./implicit-method-calculator/">Implicit</a>
+<a href="./unit-converter/">Unit converter</a></nav>
+  </div>
+</header>
+<main class="wrap page" id="main">
+<div class="title">
+  
+  <h1>ADI Solver</h1>
+  <p>Solve two-dimensional transient equations with the Alternating Direction Implicit method. Set up the grid, enter coefficients by node, and inspect the solution.</p>
+</div><noscript><p class="noscript notice">Enable JavaScript to run this calculator. The reference text and links below are available without it.</p></noscript><section class="panel" id="problem-setup" aria-labelledby="setup-title">
+  <div class="panel-title adi-reference-header">
+    <h2 id="setup-title">Problem setup</h2>
+    <a href="#equations-and-coefficients">Equations and coefficient conversion</a>
+  </div>
+  <div class="panel-body">
+    <form id="adi-setup" novalidate>
+      <fieldset id="setup-controls">
+        <div class="field-grid setup-grid"><div class="field">
+  <label for="nx">N<sub>x</sub></label>
+  <input id="nx" name="nx" type="number" step="any" value="" aria-label="Nx · Number of nodes in the x direction." title="Number of nodes in the x direction.">
+</div><div class="field">
+  <label for="ny">N<sub>y</sub></label>
+  <input id="ny" name="ny" type="number" step="any" value="" aria-label="Ny · Number of nodes in the y direction." title="Number of nodes in the y direction.">
+</div><div class="field">
+  <label for="m">m</label>
+  <input id="m" name="m" type="number" step="any" value="" aria-label="m · Number of variables or equations at each node." title="Number of variables or equations at each node.">
+</div><div class="field">
+  <label for="dx">Δx</label>
+  <input id="dx" name="dx" type="number" step="any" value="" aria-label="dx · Grid spacing in the x direction, in metres for the heat example." title="Grid spacing in the x direction, in metres for the heat example.">
+</div><div class="field">
+  <label for="dy">Δy</label>
+  <input id="dy" name="dy" type="number" step="any" value="" aria-label="dy · Grid spacing in the y direction, in metres for the heat example." title="Grid spacing in the y direction, in metres for the heat example.">
+</div><div class="field">
+  <label for="nt">N<sub>t</sub></label>
+  <input id="nt" name="nt" type="number" step="any" value="" aria-label="Nt · Number of time steps." title="Number of time steps.">
+</div><div class="field">
+  <label for="dt">Δt</label>
+  <input id="dt" name="dt" type="number" step="any" value="" aria-label="dt · Time step size, in seconds for the heat example." title="Time step size, in seconds for the heat example.">
+</div></div>
+        <div class="setup-secondary">
+          <div class="field"><label for="boundary">Boundary convention</label>
+            <select id="boundary" name="boundary">
+              <option value="fixed">Fixed edge values from U₀</option>
+              <option value="desktop">Desktop compatibility</option>
+            </select></div>
+          <div class="actions">
+            <button type="button" id="create-nodes">Create node table</button>
+            <button type="button" id="zero-nodes" disabled>Fill all zeros</button>
+            <button type="button" id="load-example">Load example</button>
+            <button type="button" id="reset-solver">Reset</button>
+            <button type="submit" class="primary" id="solve">Solve</button>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+    <div class="run-state">
+      <progress id="solve-progress" aria-label="Solver progress" hidden></progress>
+      <button type="button" id="cancel-solve" hidden>Cancel solve</button>
+      <p class="status" id="adi-status" role="status"></p>
+    </div>
+  </div>
+</section><div class="solver-grid"><section class="panel" aria-labelledby="navigator-title">
+  <h2 class="panel-title" id="navigator-title">Node navigator</h2>
+  <div class="panel-body">
+    <fieldset id="node-nav" disabled>
+      <div class="xyz"><div class="field"><label for="node-i">i</label>
+        <input id="node-i" type="number" step="1" min="0" data-coordinate="i"></div><div class="field"><label for="node-j">j</label>
+        <input id="node-j" type="number" step="1" min="0" data-coordinate="j"></div><div class="field"><label for="node-k">k</label>
+        <input id="node-k" type="number" step="1" min="0" data-coordinate="k"></div></div>
+      <div class="node-jump"><button id="jump-node" type="button">Go to node</button><span class="mono small" id="selected-node" aria-live="polite">—</span></div>
+      <div class="node-map" id="node-map" aria-label="Nearby nodes"></div>
+      <div class="big-divider"></div>
+      <p class="field-title">Jump to a coefficient</p>
+      <div class="coeff-grid"><button type="button" class="north" title="North · e" aria-label="North · e" data-coeff="e">↑ e</button><button type="button" class="west" title="West · c" aria-label="West · c" data-coeff="c">← c</button><button type="button" class="center" title="Centre x · b" aria-label="Centre x · b" data-coeff="b">b</button><button type="button" class="east" title="East · a" aria-label="East · a" data-coeff="a">a →</button><button type="button" class="south" title="South · g" aria-label="South · g" data-coeff="g">↓ g</button></div>
+      <div class="big-divider"></div>
+      <div class="other-coeff"><button type="button" data-coeff="f">Centre y · f</button><button type="button" data-coeff="d">Source x · d</button><button type="button" data-coeff="h">Source y · h</button><button type="button" data-coeff="u0">Initial U0</button></div>
+    </fieldset>
+  </div>
+</section><div class="solver-center">
+  <section class="panel" aria-label="Nodes and solution">
+    <div role="tablist" aria-label="Solver tables" class="tabs">
+      <button type="button" role="tab" id="input-tab" data-tab="inputs" aria-selected="true" aria-controls="inputs-panel">Node input table</button>
+      <button type="button" role="tab" id="solution-tab" data-tab="solution" aria-selected="false" aria-controls="solution-panel" tabindex="-1">Final solution</button>
+    </div>
+    <div role="tabpanel" id="inputs-panel" aria-labelledby="input-tab">
+      <fieldset id="node-entries" disabled>
+        <p class="empty small" id="node-empty">Create the node table to enter coefficients.</p>
+        <div class="table-wrap table-scroll" id="input-table" tabindex="0" aria-label="Scrollable node input table" hidden>
+          <table class="cell-table"><thead><tr><th scope="col">Node (i,j,k)</th>
+            <th scope="col">a</th><th scope="col">b</th><th scope="col">c</th><th scope="col">d</th><th scope="col">e</th><th scope="col">f</th><th scope="col">g</th><th scope="col">h</th><th scope="col">U0</th></tr></thead>
+            <tbody id="node-body"></tbody></table>
+        </div>
+        <div class="pager" id="input-pager" hidden>
+  <span id="input-page" role="status">0 rows</span>
+  <button type="button" id="input-prev" disabled>Previous</button>
+  <button type="button" id="input-next" disabled>Next</button>
+</div>
+      </fieldset>
+    </div>
+    <div role="tabpanel" id="solution-panel" aria-labelledby="solution-tab" hidden>
+      <p class="empty small" id="solution-empty">Run Solve to see the final value at each node.</p>
+      <div class="table-wrap table-scroll" id="solution-table" tabindex="0" aria-label="Scrollable final solution table" hidden>
+        <table class="solution-table"><thead><tr><th scope="col">Node (i,j,k)</th><th scope="col">Final U</th></tr></thead><tbody id="solution-body" class="table-numbers"></tbody></table>
+      </div>
+      <div class="pager" id="solution-pager" hidden>
+  <span id="solution-page" role="status">0 rows</span>
+  <button type="button" id="solution-prev" disabled>Previous</button>
+  <button type="button" id="solution-next" disabled>Next</button>
+</div>
+    </div>
+  </section>
+  <details class="panel coupling" id="coupling-details" hidden>
+    <summary>Local coupling matrix G</summary>
+    <div class="panel-body">
+      <p class="small muted">G[k, ℓ] multiplies variable ℓ in the equation for variable k at the same node. Leave entries at zero for uncoupled variables.</p>
+      <fieldset id="coupling-controls" disabled>
+        <div class="table-wrap" tabindex="0" aria-label="Scrollable coupling matrix"><table id="coupling-table" class="cell-table"></table></div>
+      </fieldset>
+    </div>
+  </details>
+</div>
+          <div class="tool-sidebar"><section class="panel" aria-labelledby="unit-title">
+  <h2 class="panel-title" id="unit-title">Unit converter</h2>
+  <form class="panel-body unit-form" id="unit-form" novalidate>
+    <div class="field-grid">
+      <div class="field field-wide"><label for="quantity">Quantity</label>
+        <select id="quantity" name="quantity"><option>Length</option><option>Area</option><option>Volume</option><option>Pressure</option><option>Temperature</option><option>Mass</option><option>Time</option><option>Velocity</option><option>Mass Flow Rate</option><option>Volumetric Flow Rate</option><option>Energy</option><option>Power</option><option>Specific Heat</option><option>Thermal Conductivity</option><option>Dynamic Viscosity</option><option>Density</option></select></div>
+      <div class="field"><label for="unit-from">From</label><select id="unit-from" name="from"></select></div>
+      <div class="field"><label for="unit-to">To</label><select id="unit-to" name="to"></select></div>
+      <div class="field field-wide"><label for="unit-value">Value</label><input id="unit-value" name="value" type="number" step="any"></div>
+      <div class="field field-wide"><label for="unit-converted">Converted value</label><input id="unit-converted" name="converted" type="text" readonly></div>
+    </div>
+    <div class="actions form-actions"><button class="primary" type="submit">Calculate + Copy</button></div>
+    <p class="status" id="unit-status" role="status"></p>
+  </form>
+</section><section class="panel" id="unit-history" aria-labelledby="unit-history-title">
+  <div class="panel-title history-header">
+    <h2 id="unit-history-title">Clipboard history</h2>
+    <button type="button" class="history-clear" disabled>Clear history</button>
+  </div>
+  <p class="empty small history-empty">No unit conversions saved on this page yet.</p>
+  <ul class="history-list"></ul>
+  <p class="history-message" role="status"></p>
+</section></div></div><section class="section adi-reference" id="equations-and-coefficients" aria-labelledby="equations-heading">
+  <header class="adi-reference-header">
+    <h2 id="equations-heading">Equations and coefficient conversion</h2>
+    <a href="#problem-setup">Go to problem setup</a>
+  </header>
+  <div class="panel panel-body">
+    <h3>Start with the 2D heat equation</h3>
+    <div class="adi-math adi-math-compact" tabindex="0" role="region"
+    aria-label="Two-dimensional heat equation"><math display="block"><mfrac><mrow><mo>∂</mo><mi>T</mi></mrow><mrow><mo>∂</mo><mi>t</mi></mrow></mfrac><mo>=</mo><mi>α</mi><mo>(</mo><mfrac><mrow><msup><mo>∂</mo><mn>2</mn></msup><mi>T</mi></mrow><mrow><mo>∂</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mo>+</mo><mfrac><mrow><msup><mo>∂</mo><mn>2</mn></msup><mi>T</mi></mrow><mrow><mo>∂</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></mfrac><mo>)</mo></math></div>
+    <h3>Discretise time and space</h3>
+    <p>Use a backward difference in time and centred second differences in space. The discrete equation at an interior node is</p>
+    <div class="adi-math" tabindex="0" role="region"
+    aria-label="Backward time difference and centred spatial differences"><math display="block"><mfrac><mrow><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi></mrow></msubsup></mrow><mrow><mi>Δ</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mi>α</mi><mo>(</mo><mfrac><mrow><msubsup><mi>T</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><mn>2</mn><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup></mrow><mrow><msup><mrow><mo>(</mo><mi>Δ</mi><mi>x</mi><mo>)</mo></mrow><mn>2</mn></msup></mrow></mfrac><mo>+</mo><mfrac><mrow><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>+</mo><mn>1</mn></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><mn>2</mn><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>−</mo><mn>1</mn></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup></mrow><mrow><msup><mrow><mo>(</mo><mi>Δ</mi><mi>y</mi><mo>)</mo></mrow><mn>2</mn></msup></mrow></mfrac><mo>)</mo></math></div>
+    <h3>Match the solver’s coefficient form</h3>
+    <p>Factor one grid spacing out of each spatial denominator. For the x direction, the conversion is</p>
+    <div class="adi-math" tabindex="0" role="region"
+    aria-label="Factoring the x-direction heat diffusion term"><math display="block"><mfrac><mrow><mi>α</mi><mo>(</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><mn>2</mn><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>)</mo></mrow><mrow><msup><mrow><mo>(</mo><mi>Δ</mi><mi>x</mi><mo>)</mo></mrow><mn>2</mn></msup></mrow></mfrac><mo>=</mo><mfrac><mrow><mfrac><mrow><mi>α</mi></mrow><mrow><mi>Δ</mi><mi>x</mi></mrow></mfrac><msubsup><mi>T</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><mfrac><mrow><mn>2</mn><mi>α</mi></mrow><mrow><mi>Δ</mi><mi>x</mi></mrow></mfrac><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mfrac><mrow><mi>α</mi></mrow><mrow><mi>Δ</mi><mi>x</mi></mrow></mfrac><msubsup><mi>T</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup></mrow><mrow><mi>Δ</mi><mi>x</mi></mrow></mfrac></math></div>
+    <p>Do the same for the y direction, then match the two numerators to this form.</p>
+    <div class="adi-math" tabindex="0" role="region"
+    aria-label="Solver form with coefficients a through h"><math display="block"><mfrac><mrow><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>−</mo><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi></mrow></msubsup></mrow><mrow><mi>Δ</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mi>a</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>b</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>c</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>d</mi></mrow><mrow><mi>Δ</mi><mi>x</mi></mrow></mfrac><mo>+</mo><mfrac><mrow><mi>e</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>+</mo><mn>1</mn></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>f</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>g</mi><msubsup><mi>T</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>−</mo><mn>1</mn></mrow>
+    <mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msubsup><mo>+</mo><mi>h</mi></mrow><mrow><mi>Δ</mi><mi>y</mi></mrow></mfrac></math></div>
+    <p class="small muted">The form above shows all spatial terms at time level <var>n</var> + 1. ADI uses the same coefficients in two sweeps, treating x implicitly first and y implicitly second.</p>
+    <div class="adi-reference-grid">
+      <section>
+        <h3>Coefficients to enter</h3>
+        <div class="table-wrap">
+          <table class="adi-coefficient-table">
+            <thead><tr><th scope="col">Input</th><th scope="col">Meaning</th><th scope="col">Heat equation value</th></tr></thead>
+            <tbody><tr><th scope="row"><var>a</var></th><td>East neighbour (i + 1, j)</td><td>α/Δx</td></tr><tr><th scope="row"><var>b</var></th><td>Centre node, x direction</td><td>−2α/Δx</td></tr><tr><th scope="row"><var>c</var></th><td>West neighbour (i − 1, j)</td><td>α/Δx</td></tr><tr><th scope="row"><var>d</var></th><td>Source term, x direction</td><td>0</td></tr><tr><th scope="row"><var>e</var></th><td>North neighbour (i, j + 1)</td><td>α/Δy</td></tr><tr><th scope="row"><var>f</var></th><td>Centre node, y direction</td><td>−2α/Δy</td></tr><tr><th scope="row"><var>g</var></th><td>South neighbour (i, j − 1)</td><td>α/Δy</td></tr><tr><th scope="row"><var>h</var></th><td>Source term, y direction</td><td>0</td></tr></tbody>
+          </table>
+        </div>
+        <p class="small">For constant thermal diffusivity, use these values at every interior node. Enter the initial temperatures in <strong>U<sub>0</sub></strong>, set <var>m</var> = 1 and leave <var>G</var> at zero.</p>
+      </section>
+      <div>
+        <section class="notation"><h3>Symbols</h3><dl class="symbol-key">
+    <dt>T</dt><dd>Temperature in a consistent unit throughout the grid.</dd><dt>T<sub>i,j</sub><sup>n</sup></dt><dd>Temperature at grid node (i, j) at the current time level n. The superscript n + 1 indicates the next time level.</dd><dt>x, y, t</dt><dd>Spatial coordinates x and y in metres, and time t in seconds.</dd><dt>i, j, k</dt><dd>Zero-based x-node, y-node, and variable indices. In this single-temperature model, k is 0.</dd><dt>α</dt><dd>Thermal diffusivity, in m²/s.</dd><dt>N<sub>x</sub></dt><dd>Number of nodes in the x direction.</dd><dt>N<sub>y</sub></dt><dd>Number of nodes in the y direction.</dd><dt>m</dt><dd>Number of variables or equations at each node.</dd><dt>Δx</dt><dd>Grid spacing in the x direction, in metres for the heat example.</dd><dt>Δy</dt><dd>Grid spacing in the y direction, in metres for the heat example.</dd><dt>N<sub>t</sub></dt><dd>Number of time steps.</dd><dt>Δt</dt><dd>Time step size, in seconds for the heat example.</dd><dt>U<sub>0</sub></dt><dd>Initial values on the grid. For heat diffusion these are the temperatures at time level 0.</dd><dt>G</dt><dd>m × m matrix for coupling different variables at the same node.</dd>
+  </dl></section>
+      </div>
+    </div>
+  </div>
+</section>
+          <div class="section"><section class="panel" id="solver-history" aria-labelledby="solver-history-title">
+  <div class="panel-title history-header">
+    <h2 id="solver-history-title">Solver history</h2>
+    <button type="button" class="history-clear" disabled>Clear history</button>
+  </div>
+  <p class="empty small history-empty">No solver runs saved yet.</p>
+  <ul class="history-list"></ul>
+  <p class="history-message" role="status"></p>
+</section></div>
+          <section class="section prose"><h2>Solver reference</h2>
+            <p>The node table uses zero-based indices (i, j, k). The outer nodes remain fixed. Choose Desktop compatibility when comparing with the original Tkinter solver or when its boundary terms have already been accounted for in your coefficients.</p>
+            <p><strong>Load example</strong> fills a 3 × 3 heat diffusion problem. With fixed edges at 100 and a starting centre value of 0, the centre reaches 98.1928405 after 10 steps using the loaded settings.</p>
+            <ul>
+              <li><a href="./adi-method/">ADI method, formulas and coefficient definitions</a></li>
+              <li><a href="./explicit-method-calculator/">Explicit method calculator</a></li>
+              <li><a href="./implicit-method-calculator/">Implicit method calculator</a></li>
+              <li><a href="./unit-converter/">Engineering unit converter</a></li>
+            </ul>
+          </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="https://aditusan.dev/">aditusan.dev</a>
+    <nav aria-label="Footer navigation">
+      <a href="./">Full ADI solver</a>
+      <a href="./privacy/">Privacy</a>
+      
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

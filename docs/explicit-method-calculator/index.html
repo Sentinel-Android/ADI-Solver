@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explicit Method Calculator | 1D Heat Equation</title>
+<meta name="description" content="Solve the one-dimensional heat equation using the forward-time, centred-space explicit method and fixed temperatures at both ends.">
+<link rel="canonical" href="https://adi.aditusan.dev/explicit-method-calculator/">
+
+<link rel="stylesheet" href="../assets/site.css">
+
+
+<script defer src="../assets/site.js"></script>
+<script defer src="../assets/heat-calculator.js"></script>
+</head>
+<body class="site-adi">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../"><span class="brand-mark" aria-hidden="true">Δ</span>ADI Solver</a>
+    <nav class="site-nav" aria-label="Main navigation"><a href="../">Solver</a>
+<a href="../adi-method/">ADI method & definitions</a>
+<a href="../explicit-method-calculator/">Explicit</a>
+<a href="../implicit-method-calculator/">Implicit</a>
+<a href="../unit-converter/">Unit converter</a></nav>
+  </div>
+</header>
+<main class="wrap page" id="main">
+<div class="title">
+  <a class="back" href="../">← Full ADI solver</a>
+  <h1>Explicit Method Calculator</h1>
+  <p>Solve the one-dimensional heat equation using the forward-time, centred-space explicit method and fixed temperatures at both ends.</p>
+</div><noscript><p class="noscript notice">Enable JavaScript to run this calculator. The reference text and links below are available without it.</p></noscript>
+<div class="calculator heat-layout">
+  <section class="panel">
+    <h2 class="panel-title">Problem setup</h2>
+    <form id="heat-form" class="panel-body" data-method="explicit" novalidate>
+      <div class="field-grid">
+        <div class="field">
+  <label for="alpha">Thermal diffusivity α <span class="unit">(m²/s)</span></label>
+  <input id="alpha" name="alpha" type="number" step="any" value="" >
+</div>
+        <div class="field">
+  <label for="dx">Grid spacing Δx <span class="unit">(m)</span></label>
+  <input id="dx" name="dx" type="number" step="any" value="" >
+</div>
+        <div class="field">
+  <label for="dt">Time step Δt <span class="unit">(s)</span></label>
+  <input id="dt" name="dt" type="number" step="any" value="" >
+</div>
+        <div class="field">
+  <label for="nt">Number of steps N<sub>t</sub></label>
+  <input id="nt" name="nt" type="number" step="any" value="" >
+</div>
+        <div class="field field-wide"><label for="values">Initial temperatures</label>
+          <textarea id="values" name="values" rows="3" aria-describedby="profile-note"></textarea>
+          <p id="profile-note" class="small muted">Enter values separated by commas or spaces. The first and last values are held fixed.</p>
+        </div>
+      </div>
+      <div class="actions form-actions"><button class="primary" type="submit">Calculate</button>
+        <button id="heat-example" type="button" data-example="{&quot;values&quot;:&quot;100, 0, 100&quot;,&quot;alpha&quot;:1,&quot;dx&quot;:1,&quot;dt&quot;:0.1,&quot;nt&quot;:1,&quot;implicit&quot;:false}">Load example</button></div>
+      <p class="status" id="heat-status" role="status"></p>
+    </form>
+  </section>
+  <section class="panel">
+    <h2 class="panel-title">Final temperatures</h2>
+    <div class="panel-body">Diffusion number r <output id="diffusion-number">—</output></div>
+    <div class="table-wrap" id="heat-results" hidden>
+      <table><thead><tr><th>Node</th><th>Initial</th><th>Final</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+</div>
+<div class="section"><section class="panel" id="heat-history" aria-labelledby="heat-history-title">
+  <div class="panel-title history-header">
+    <h2 id="heat-history-title">Calculation history</h2>
+    <button type="button" class="history-clear" disabled>Clear history</button>
+  </div>
+  <p class="empty small history-empty">No calculations saved on this page yet.</p>
+  <ul class="history-list"></ul>
+  <p class="history-message" role="status"></p>
+</section></div>
+<section class="section prose"><h2>Formula</h2>
+  <div class="equation"><div>∂U/∂t = α ∂<sup>2</sup>U/∂x<sup>2</sup></div><div>r = α Δt / (Δx)<sup>2</sup></div><div>U<sub>i</sub><sup>n+1</sup> = (1 − 2r) U<sub>i</sub><sup>n</sup> + r U<sub>i−1</sub><sup>n</sup> + r U<sub>i+1</sub><sup>n</sup></div></div>
+  <section class="notation"><h3>Symbols</h3><dl class="symbol-key">
+    <dt>U</dt><dd>Temperature in a consistent unit throughout the grid.</dd><dt>t, x</dt><dd>Time in seconds and position in metres.</dd><dt>α</dt><dd>Thermal diffusivity in m²/s.</dd><dt>Δx, Δt</dt><dd>Grid spacing in metres and time step in seconds.</dd><dt>r</dt><dd>Dimensionless diffusion number.</dd><dt>i</dt><dd>Node index. The adjacent nodes are i − 1 and i + 1.</dd><dt>n</dt><dd>Time-level index. n + 1 is the next time step.</dd><dt>U<sub>i</sub><sup>n</sup></dt><dd>Temperature at node i and time level n.</dd>
+  </dl></section>
+  <p>Forward-time, centred-space updates each interior node from temperatures at the previous step. For this one-dimensional diffusion stencil, use r ≤ 0.5.</p>
+  <h2>Worked example</h2>
+  <p>With α = 1 m²/s, Δx = 1 m, Δt = 0.1 s and initial temperatures [100, 0, 100], r = 0.1. The calculator gives a centre temperature of <strong>20</strong> after one step. The endpoints stay at 100.</p>
+  <p><a href="../implicit-method-calculator/">Try the implicit method</a> or read the <a href="../adi-method/">ADI method guide</a>.</p>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <a href="https://aditusan.dev/">aditusan.dev</a>
+    <nav aria-label="Footer navigation">
+      <a href="../">Full ADI solver</a>
+      <a href="../privacy/">Privacy</a>
+      
+    </nav>
+  </div>
+</footer>
+</body>
+</html>
