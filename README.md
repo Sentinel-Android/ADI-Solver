@@ -164,7 +164,7 @@ npm run build
 
 To publish the prebuilt files, push the repository and choose **Settings → Pages → Deploy from a branch**, then select `main` and `/docs`. GitHub Pages serves the files and the browser performs the calculations. [GitHub Pages publishing guide](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
 
-The configured custom domain is `adi.aditusan.dev`. To use it, set the custom domain in Pages and point its DNS CNAME to the repository owner's `github.io` host. If the public URL changes, update [site.config.mjs](site.config.mjs) and rebuild to regenerate the canonical URLs and sitemap. [GitHub Pages custom-domain guide](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)
+The configured custom domain is `adisolver.aditusan.dev`. To use it, set the custom domain in Pages and point its DNS CNAME to the repository owner's `github.io` host. If the public URL changes, update [site.config.mjs](site.config.mjs) and rebuild to regenerate the canonical URLs and sitemap. [GitHub Pages custom-domain guide](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)
 
 The supplied build has ads disabled. For optional AdSense setup, configure the public publisher ID in [site.config.mjs](site.config.mjs) and rebuild to emit verification metadata and `ads.txt`. Enable `serveAds` after site approval and configuring the required consent settings. [AdSense site verification](https://support.google.com/adsense/answer/12169212) · [GitHub Pages usage limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)
 
